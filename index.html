@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>ナツコイ — 仮想世界の花札決戦</title>
+<meta name="description" content="乗っ取りAI〈ノイズ〉から仮想世界を取り戻せ。花札こいこいでアカウントを賭けた夏の決戦。ルールを知らなくても、練習とヒントで遊べます。">
+<meta name="theme-color" content="#eaf5ff">
+<meta property="og:title" content="ナツコイ — 仮想世界の花札決戦">
+<meta property="og:description" content="乗っ取りAIと、アカウントを賭けて花札こいこい。世界中のアバターが応援してくれる、夏の決戦。">
+<meta property="og:image" content="https://bubbleshaker.github.io/natsukoi/og.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<canvas id="world" aria-hidden="true"></canvas>
+
+<!-- タイトル -->
+<section id="title" class="screen">
+  <div class="logo">
+    <p class="pre">仮想世界ハルカ 花札決戦</p>
+    <h1><span>ナ</span><span>ツ</span><span>コ</span><span>イ</span></h1>
+    <p class="sub">乗っ取りAI〈ノイズ〉と、アカウントを賭けて<br>こいこい勝負。</p>
+  </div>
+  <div class="menu">
+    <div class="field">
+      <span class="lbl">月数</span>
+      <div class="seg" id="months"><button data-v="3">3か月</button><button data-v="6">6か月</button><button data-v="12">12か月</button></div>
+    </div>
+    <button id="btnStart" class="btn primary big">ノイズと対決する</button>
+    <button id="btnTutorial" class="btn">れんしゅう<small>花札がはじめての人はこちら</small></button>
+    <div class="row">
+      <button id="btnRules" class="btn ghost">あそびかた・役</button>
+      <button id="btnStory" class="btn ghost">ものがたり</button>
+    </div>
+    <p id="rec"></p>
+  </div>
+</section>
+
+<!-- 導入 -->
+<section id="story" class="screen" hidden>
+  <p id="storyText"></p>
+  <p class="tapnext">タップでつぎへ</p>
+  <button id="skipStory" class="btn ghost small">スキップ</button>
+</section>
+
+<!-- 対局 -->
+<section id="board" class="screen" hidden>
+  <header id="top">
+    <button id="help" class="icon" aria-label="あそびかた">？</button>
+    <div id="monthLbl"></div>
+    <div id="tug"><span class="who me">あなた <b id="myPts">0</b></span><div class="bar"><i></i></div><span class="who ai"><b id="aiPts">0</b> ノイズ</span></div>
+    <button id="mute" class="icon" aria-label="音のオン・オフ">
+      <svg viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path class="wave" d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11"/><path class="cross" d="M16 9.5l5 5M21 9.5l-5 5"/></svg>
+    </button>
+  </header>
+
+  <div id="aiZone" class="zone">
+    <div id="noise">
+      <svg viewBox="0 0 60 60" aria-hidden="true">
+        <path class="body" d="M30 4 L38 12 L50 8 L48 22 L58 30 L48 38 L52 52 L38 48 L30 58 L22 48 L8 52 L12 38 L2 30 L12 22 L10 8 L22 12Z"/>
+        <circle cx="30" cy="30" r="13" fill="#111"/><circle class="eye" cx="30" cy="30" r="9" fill="none" stroke="#ff2d55" stroke-width="3"/>
+        <circle cx="30" cy="30" r="3.4" fill="#ff2d55"/>
+      </svg>
+      <span>ノイズ</span>
+      <p id="noiseSay"></p>
+    </div>
+    <div class="aiRight">
+      <div id="aiHand" class="hand"></div>
+      <div id="aiChips" class="chips"></div>
+    </div>
+  </div>
+  <div id="aiCaps" class="caps"></div>
+
+  <div id="fieldZone">
+    <div class="deck"><div id="stock"></div><div id="drawn"></div></div>
+    <div id="field"></div>
+  </div>
+
+  <div id="myCaps" class="caps"></div>
+  <div id="myChips" class="chips"><span class="chip-hint"></span></div>
+  <div id="myBar"><p id="status"></p><span id="cheerBadge" hidden>応援 ×2</span><button id="hint" class="btn small">ヒント</button></div>
+  <div id="myHand" class="hand"></div>
+</section>
+
+<!-- 最終結果 -->
+<section id="final" class="screen" hidden>
+  <h2 id="finalTitle"></h2>
+  <p id="finalText"></p>
+  <div id="finalScore" class="totals"></div>
+  <div class="menu">
+    <button id="btnAgain" class="btn primary big">もう一度たたかう</button>
+    <button id="btnHome" class="btn ghost">タイトルへ</button>
+  </div>
+</section>
+
+<!-- 世界の応援 -->
+<div id="cheer" hidden>
+  <div class="words"></div>
+  <div class="msg">
+    <p class="lead">世界中のアバターが、あなたにアカウントを託した！</p>
+    <p class="count">0</p>
+    <p class="unit">人</p>
+    <p class="effect">次にあなたが勝ったとき、点が <b>2 倍</b>！</p>
+    <button class="btn primary go" hidden>みんなの力で、勝つ！</button>
+  </div>
+</div>
+
+<!-- ルール解説 -->
+<div id="rules" hidden>
+  <div class="rpanel">
+    <header><h2>あそびかた</h2><button class="close icon" aria-label="とじる">×</button></header>
+    <nav class="tabs"></nav>
+    <div class="rbody"></div>
+  </div>
+</div>
+
+<!-- チュートリアルの吹き出し -->
+<div id="coach" hidden><div class="guideAvatar"></div><p></p><button class="btn small primary">つぎへ</button></div>
+
+<div id="fx"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
